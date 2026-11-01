@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- 通信先は自分のサイトと Claude API だけ。外部のスクリプトは読まない（docs/06, docs/07） -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-khwQOzunoM/D+qliV1AoBT0s9VLa0EDgS3kiOhAN0WI='; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="家計簿">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- SDK が使う外部の名前を同梱ファイルに向ける。1文字でも変えたら CSP のハッシュを計算し直す（js/vendor/README.md） -->
+  <script type="importmap">{"imports":{"@opentelemetry/api":"./js/vendor/opentelemetry-api/index.js","standardwebhooks":"./js/vendor/standardwebhooks-stub.mjs"}}</script>
+  <title>家計簿</title>
+</head>
+<body>
+  <main id="app"><p class="loading">読み込み中…</p></main>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
