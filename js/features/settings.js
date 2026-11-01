@@ -59,7 +59,7 @@ export async function renderSettings(el) {
       <h2>使い始めの残高</h2>
       <div class="form" id="opening">
         ${m.accounts.map((a) => `
-          <label>${esc(a.name)}${a.kind === 'card' ? '（引き落とし予定額をマイナスで）' : ''}
+          <label>${esc(a.name)}${a.kind === 'card' ? '（次の引き落とし予定額。「-」は付けずにそのまま入力）' : ''}
           <input inputmode="numeric" data-acc="${a.id}" value="${Math.abs(a.openingBalance) || ''}" placeholder="0"></label>`).join('')}
         <label>この残高の日付<input type="date" id="opening-date" value="${esc(m.accounts[0].openingDate || todayISO())}"></label>
         <button type="button" id="save-opening">保存</button>
