@@ -1,18 +1,16 @@
-﻿// バックアップの書き出し・読み込み（JSON）。API キーは書き出さない（docs/07）
+﻿// バックアップの書き出し・読み込み（JSON）
 
 import { STORES, SCHEMA_VERSION, getAll, clear, putMany, setMeta, getMeta } from './storage.js';
 import { todayISO, daysBetween } from '../utils/format.js';
 import { BACKUP_WARN_DAYS } from '../config/settings.js';
 import { ensureMembers } from '../features/members.js';
 
-const SECRET_META = ['apiKey'];
+// Claude API を使っていた頃の設定。費用ゼロの方針で使わなくなったので読み込まない（docs/01）
+export const OLD_API_META = ['apiKey', 'model', 'apiUsage'];
 
 export async function buildBackup() {
   const data = {};
-  for (const name of STORES) {
-    const rows = await getAll(name);
-    data[name] = name === 'meta' ? rows.filter((r) => !SECRET_META.includes(r.key)) : rows;
-  }
+  for (const name of STORES) data[name] = await getAll(name);
   return { app: 'kakeibo', schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), data };
 }
 
@@ -43,12 +41,10 @@ export async function importBackup(file) {
   const backup = JSON.parse(await file.text());
   if (backup.app !== 'kakeibo' || !backup.data) throw new Error('家計簿のバックアップファイルではありません');
   if (backup.schemaVersion > SCHEMA_VERSION) throw new Error('新しい版のアプリで作られたバックアップです。アプリを更新してください');
-  const apiKey = await getMeta('apiKey');
   for (const name of STORES) {
     await clear(name);
-    await putMany(name, backup.data[name] || []);
+    await putMany(name, (backup.data[name] || []).filter((r) => !(name === 'meta' && OLD_API_META.includes(r.key))));
   }
-  if (apiKey) await setMeta('apiKey', apiKey);  // 端末の API キーは残す
   await ensureMembers();                         // 古い版のバックアップには家族の一覧がないため作り直す
 }
 

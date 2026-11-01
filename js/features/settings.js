@@ -1,10 +1,9 @@
-// 設定画面：API キー、生年月日、使い始めの残高、固定費・定期収入、バックアップ
+// 設定画面：家族、使い始めの残高、固定費・定期収入、バックアップ
 
-import { getAll, put, del, uid, getMeta, setMeta, requestPersist } from '../db/storage.js';
-import { MODELS, DEFAULT_MODEL } from '../config/settings.js';
+import { getAll, put, del, uid, requestPersist } from '../db/storage.js';
 import { loadMasters, runRecurring } from './transactions.js';
 import { exportBackup, importBackup, daysSinceBackup } from '../db/backup.js';
-import { yen, esc, todayISO, monthKey, num } from '../utils/format.js';
+import { yen, esc, todayISO, monthKey } from '../utils/format.js';
 import { toast, isCurrent } from '../utils/ui.js';
 import { loadMembers, addMember, RELATIONS } from './members.js';
 
@@ -17,9 +16,6 @@ const EVERY = [
 export async function renderSettings(el) {
   const m = await loadMasters();
   const recurring = await getAll('recurring');
-  const apiKey = await getMeta('apiKey', '');
-  const model = await getMeta('model', DEFAULT_MODEL);
-  const usage = (await getMeta('apiUsage', {}))[monthKey(todayISO())];
   const persist = await requestPersist();
   const days = await daysSinceBackup();
   const members = await loadMembers({ includeInactive: true });
@@ -29,15 +25,6 @@ export async function renderSettings(el) {
 
   el.innerHTML = `
     <section class="view settings">
-      <h2>レシート読み取り（Claude API）</h2>
-      <div class="form">
-        <label>API キー<input type="password" id="api-key" autocomplete="off" value="${esc(apiKey)}" placeholder="sk-ant-..."></label>
-        <p class="hint">この iPhone の中にだけ保存し、バックアップにも入れません。Anthropic Console で月の利用上限を設定しておいてください。</p>
-        <label>モデル<select id="model">${Object.entries(MODELS).map(([id, v]) => `<option value="${id}"${id === model ? ' selected' : ''}>${esc(v.label)}</option>`).join('')}</select></label>
-        <p class="hint">今月の利用：${usage ? `${usage.count}枚・約${num(usage.yen)}円` : 'なし'}</p>
-        <button type="button" id="save-api">保存</button>
-      </div>
-
       <h2>家族</h2>
       <div class="form" id="members">
         ${members.map((mm) => `
@@ -95,12 +82,6 @@ export async function renderSettings(el) {
     </section>`;
 
   const $ = (s) => el.querySelector(s);
-
-  $('#save-api').onclick = async () => {
-    await setMeta('apiKey', $('#api-key').value.trim());
-    await setMeta('model', $('#model').value);
-    toast('保存しました');
-  };
 
   $('#save-members').onclick = async () => {
     for (const row of el.querySelectorAll('.member-row')) {

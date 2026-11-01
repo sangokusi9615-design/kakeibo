@@ -1,8 +1,8 @@
 ﻿// 起動処理・画面切り替え。起動したらすぐ入力画面（docs/01 操作の原則）
 
-import { openDB, getAll, putMany, getMeta, setMeta, requestPersist, SCHEMA_VERSION } from './db/storage.js';
+import { openDB, getAll, putMany, del, getMeta, setMeta, requestPersist, SCHEMA_VERSION } from './db/storage.js';
 import { defaultCategories, defaultAccounts } from './config/categories.js';
-import { backupOverdue } from './db/backup.js';
+import { backupOverdue, OLD_API_META } from './db/backup.js';
 import { renderInput, runRecurring } from './features/transactions.js';
 import { startScan } from './features/receipt-scan.js';
 import { renderSummary } from './features/dashboard.js';
@@ -25,6 +25,8 @@ async function seed() {
   if ((await getAll('categories')).length === 0) await putMany('categories', defaultCategories);
   if ((await getAll('accounts')).length === 0) await putMany('accounts', defaultAccounts);
   if (!(await getMeta('schemaVersion'))) await setMeta('schemaVersion', SCHEMA_VERSION);
+  // 以前の版で入れた API キーなどは、使わなくなったので端末からも消す
+  for (const key of OLD_API_META) await del('meta', key);
 }
 
 function currentTab() {

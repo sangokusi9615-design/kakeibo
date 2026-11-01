@@ -128,7 +128,7 @@ export async function renderInput(el, { onScan }) {
     <section class="view input-view">
       <div class="month-total">${Number(thisMonth.slice(5))}月の支出 <strong>${yen(monthSpend)}</strong></div>
       <div id="confirm-list"></div>
-      <button type="button" class="scan-btn" id="scan">📷 レシートを撮る</button>
+      <button type="button" class="scan-btn" id="scan">🧾 レシートを読む</button>
       <div class="kind-row" id="kind"></div>
       <label class="amount-row"><input id="amount" inputmode="numeric" autocomplete="off" placeholder="0" aria-label="金額"><span>円</span></label>
       <div class="sub-row"><input type="date" id="date" value="${todayISO()}" aria-label="日付"></div>

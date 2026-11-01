@@ -22,13 +22,5 @@ export const EMERGENCY_MONTHS = 6;
 // 最終バックアップからこの日数を過ぎたら警告する
 export const BACKUP_WARN_DAYS = 30;
 
-// レシート読み取り（docs/06）。料金は 100万トークンあたりのドル（2026-11-01 時点）
-export const MODELS = {
-  'claude-opus-5-5': { label: 'Opus 5.5（正確さ重視）', inUsd: 4, outUsd: 20 },
-  'claude-haiku-5-5': { label: 'Haiku 5.5（安さ重視）', inUsd: 0.1, outUsd: 0.5 },
-};
-export const DEFAULT_MODEL = 'claude-opus-5-5';
-export const USD_JPY = 150;
-
 // レシートとカード明細を同じ買い物とみなす日付の幅（docs/03）
 export const MATCH_DAYS = 3;
