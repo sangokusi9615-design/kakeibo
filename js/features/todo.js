@@ -35,7 +35,6 @@ export async function renderTodo(el) {
       <ul class="task-list">
         <li><span>楽天銀行の CSV を取り込む</span><small>次の段階で作ります</small></li>
         <li><span>楽天カードの CSV を取り込む</span><small>${pendingCard ? `照合待ち ${pendingCard}件・` : ''}次の段階で作ります</small></li>
-        <li><span>楽天ペイ履歴のスクショを選ぶ</span><small>次の段階で作ります</small></li>
         <li><span>楽天ペイの残高・NISA の評価額を入れる</span><small>次の段階で作ります</small></li>
         <li><span>バックアップを保存</span><small>${days === null ? '未実施' : `${days}日前`}</small></li>
       </ul>

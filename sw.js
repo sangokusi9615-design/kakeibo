@@ -1,7 +1,7 @@
 ﻿// Service Worker：オフライン起動用のキャッシュ。アプリの部品だけを持ち、API の通信はキャッシュしない
 // 部品を更新したら VERSION を上げる
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/app.js', 'js/db/storage.js', 'js/db/backup.js',
