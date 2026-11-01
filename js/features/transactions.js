@@ -7,13 +7,16 @@ const ACCOUNT_ORDER = defaultAccounts.map((a) => a.id);
 import { initialMerchantRules, normalizeName } from '../config/csv-formats.js';
 import { yen, esc, todayISO, monthKey, addMonths, dayInMonth, shortDate } from '../utils/format.js';
 import { toast, chips, isCurrent } from '../utils/ui.js';
+import { loadMembers, patientOptions } from './members.js';
 
 // ---- データ ----
 
 export async function loadMasters() {
   const [categories, accounts] = await Promise.all([getAll('categories'), getAll('accounts')]);
   categories.sort((a, b) => a.order - b.order);
-  accounts.sort((a, b) => ACCOUNT_ORDER.indexOf(a.id) - ACCOUNT_ORDER.indexOf(b.id));
+  // 後から追加した口座（2人目のこどもNISA など）は最後に並べる
+  const rank = (a) => { const i = ACCOUNT_ORDER.indexOf(a.id); return i < 0 ? ACCOUNT_ORDER.length : i; };
+  accounts.sort((a, b) => rank(a) - rank(b));
   return {
     categories,
     accounts,
@@ -118,6 +121,7 @@ export async function renderInput(el, { onScan }) {
     .reduce((s, t) => s + t.amount, 0);
   const toConfirm = txs.filter((t) => t.needsConfirm);
   const lastPay = await getMeta('lastPayAccount', 'rakuten_pay');
+  const members = await loadMembers();
   if (!isCurrent('input')) return;
 
   el.innerHTML = `
@@ -218,9 +222,7 @@ export async function renderInput(el, { onScan }) {
     if (m.cat[categoryId].tax === 'medical') {
       const box = el.querySelector('#patient');
       box.hidden = false;
-      chips(box.querySelector('#patient-chips'), [
-        { value: 'self', label: '自分' }, { value: 'child', label: '子ども' }, { value: 'family', label: 'ほかの家族' },
-      ], null, (v) => save(categoryId, v));
+      chips(box.querySelector('#patient-chips'), patientOptions(members), null, (v) => save(categoryId, v));
       box.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }

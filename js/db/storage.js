@@ -2,12 +2,12 @@
 // ストアの中身は docs/03_データ設計.md
 
 const DB_NAME = 'kakeibo';
-const DB_VERSION = 1;
-export const SCHEMA_VERSION = 1;
+const DB_VERSION = 2;           // 2：members（家族）を追加
+export const SCHEMA_VERSION = 2;
 
 export const STORES = [
   'transactions', 'categories', 'merchantRules', 'accounts', 'balances', 'budgets',
-  'templates', 'specialPlans', 'recurring', 'goals', 'meta',
+  'templates', 'specialPlans', 'recurring', 'goals', 'members', 'meta',
 ];
 
 let dbPromise;

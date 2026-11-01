@@ -151,6 +151,10 @@ small { display: block; color: var(--muted); font-size: 12px; }
 .form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
 .form label.inline { flex-direction: row; align-items: center; gap: 8px; }
 .form label.check input { border-color: #d39b2a; background: var(--warn-bg); }
+.member-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.member-row .inline { grid-column: 1 / -1; }
+.member-row.inactive input:not([type="checkbox"]) { opacity: 0.5; }
+.member-add { display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--line); padding-top: 12px; }
 .item-list li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .btn-row { display: flex; gap: 8px; margin-top: 16px; }
 .btn-row button { flex: 1; padding: 14px; }

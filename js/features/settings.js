@@ -6,6 +6,7 @@ import { loadMasters, runRecurring } from './transactions.js';
 import { exportBackup, importBackup, daysSinceBackup } from '../db/backup.js';
 import { yen, esc, todayISO, monthKey, num } from '../utils/format.js';
 import { toast, isCurrent } from '../utils/ui.js';
+import { loadMembers, addMember, RELATIONS } from './members.js';
 
 // 定期登録の支払元に楽天カード・他社カードは出さない（カード明細から入るので二重になる。docs/03）
 const RECURRING_ACCOUNTS = ['rakuten_bank', 'cash'];
@@ -21,8 +22,7 @@ export async function renderSettings(el) {
   const usage = (await getMeta('apiUsage', {}))[monthKey(todayISO())];
   const persist = await requestPersist();
   const days = await daysSinceBackup();
-  const selfBirth = await getMeta('selfBirth', '');
-  const childBirth = await getMeta('childBirth', '');
+  const members = await loadMembers({ includeInactive: true });
   if (!isCurrent('settings')) return;
   const catOptions = (group) => m.categories.filter((c) => (group === 'income' ? c.group === 'income' : c.group !== 'income'))
     .map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
@@ -38,12 +38,22 @@ export async function renderSettings(el) {
         <button type="button" id="save-api">保存</button>
       </div>
 
-      <h2>生年月日</h2>
-      <div class="form">
-        <label>本人<input type="date" id="self-birth" value="${esc(selfBirth)}"></label>
-        <label>子ども<input type="date" id="child-birth" value="${esc(childBirth)}"></label>
-        <p class="hint">こどもNISA の引き出せる時期や、入学の年の計算に使います。外には送りません。</p>
-        <button type="button" id="save-birth">保存</button>
+      <h2>家族</h2>
+      <div class="form" id="members">
+        ${members.map((mm) => `
+          <div class="member-row${mm.active ? '' : ' inactive'}" data-id="${mm.id}">
+            <label>${RELATIONS[mm.relation]}<input data-f="nickname" value="${esc(mm.nickname)}" aria-label="呼び名"></label>
+            <label>生年月日<input type="date" data-f="birthDate" value="${esc(mm.birthDate)}"></label>
+            ${mm.id === 'self' ? '' : `<label class="inline"><input type="checkbox" data-f="active"${mm.active ? ' checked' : ''}> 一覧に出す</label>`}
+          </div>`).join('')}
+        <p class="hint">呼び名（「妻」「長男」など）だけを入れ、本名は入れないでください。医療費の「誰の分？」、こどもNISA、入学の年の計算に使います。外には送りません。</p>
+        <button type="button" id="save-members">保存</button>
+        <div class="member-add">
+          <label>追加する家族<select id="m-relation">${['spouse', 'child', 'other'].map((r) => `<option value="${r}">${RELATIONS[r]}</option>`).join('')}</select></label>
+          <label>呼び名<input id="m-nickname" placeholder="妻"></label>
+          <label>生年月日<input type="date" id="m-birth"></label>
+          <button type="button" id="add-member">追加</button>
+        </div>
       </div>
 
       <h2>使い始めの残高</h2>
@@ -92,10 +102,33 @@ export async function renderSettings(el) {
     toast('保存しました');
   };
 
-  $('#save-birth').onclick = async () => {
-    await setMeta('selfBirth', $('#self-birth').value);
-    await setMeta('childBirth', $('#child-birth').value);
+  $('#save-members').onclick = async () => {
+    for (const row of el.querySelectorAll('.member-row')) {
+      const mm = members.find((x) => x.id === row.dataset.id);
+      const active = row.querySelector('[data-f="active"]');
+      await put('members', {
+        ...mm,
+        nickname: row.querySelector('[data-f="nickname"]').value.trim() || RELATIONS[mm.relation],
+        birthDate: row.querySelector('[data-f="birthDate"]').value,
+        active: active ? active.checked : true,
+      });
+    }
     toast('保存しました');
+    renderSettings(el);
+  };
+
+  // 子どもを追加したら、その子のこどもNISA の口座も用意する（1人目は最初からある）
+  $('#add-member').onclick = async () => {
+    const relation = $('#m-relation').value;
+    const mm = await addMember({ relation, nickname: $('#m-nickname').value.trim(), birthDate: $('#m-birth').value });
+    if (relation === 'child' && mm.id !== 'child') {
+      await put('accounts', {
+        id: `kids_nisa_${mm.id}`, name: `こどもNISA（${mm.nickname}）`, kind: 'kids_nisa', liquid: false,
+        owner: mm.id, openingBalance: 0, openingDate: null,
+      });
+    }
+    toast(`${mm.nickname}を追加しました`);
+    renderSettings(el);
   };
 
   $('#save-opening').onclick = async () => {

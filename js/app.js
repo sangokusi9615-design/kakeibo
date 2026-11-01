@@ -9,6 +9,7 @@ import { renderSummary } from './features/dashboard.js';
 import { renderTodo } from './features/todo.js';
 import { renderAssets } from './features/assets.js';
 import { renderSettings } from './features/settings.js';
+import { ensureMembers } from './features/members.js';
 
 const TABS = [
   { id: 'input', label: '入力', icon: '✏️' },
@@ -61,6 +62,7 @@ function renderNav() {
 async function boot() {
   await openDB();
   await seed();
+  await ensureMembers();
   await requestPersist();
   await runRecurring();
   renderNav();

@@ -7,6 +7,7 @@ import { PAYMENT_ACCOUNTS } from '../config/categories.js';
 import { loadMasters, newTransaction, statusFor, guessCategory, learnCategory } from './transactions.js';
 import { yen, esc, todayISO } from '../utils/format.js';
 import { toast, chips } from '../utils/ui.js';
+import { loadMembers, patientOptions } from './members.js';
 
 const LONG_SIDE = 1500;
 
@@ -163,6 +164,7 @@ async function renderConfirm(el, r, { onDone, onRetake }) {
   let categoryId = guessed || (r.isMedical ? 'pharmacy' : r.selfMedicationTotal ? 'otc' : 'daily');
   let pay = PAY_FROM_RESULT[r.paymentMethod] || 'rakuten_pay';  // 書いていなければ一番使う楽天ペイ
   let patient = await getMeta('lastPatient', 'self');
+  const members = await loadMembers();
   const itemSum = r.items.reduce((s, i) => s + i.amount, 0);
   const mismatch = r.items.length > 0 && itemSum !== r.total;
   const lowDate = r.confidence === 'low' || !/^\d{4}-\d{2}-\d{2}$/.test(r.date);
@@ -204,9 +206,7 @@ async function renderConfirm(el, r, { onDone, onRetake }) {
   const catIds = [...new Set([categoryId, 'food', 'daily', 'eatout', 'child_goods', 'otc', 'pharmacy', 'other'])];
   chips(el.querySelector('#cat'), catIds.map((id) => ({ value: id, label: m.cat[id].name })), categoryId, (v) => { categoryId = v; });
   if (needsPatient) {
-    chips(el.querySelector('#patient'), [
-      { value: 'self', label: '自分' }, { value: 'child', label: '子ども' }, { value: 'family', label: 'ほかの家族' },
-    ], patient, (v) => { patient = v; });
+    chips(el.querySelector('#patient'), patientOptions(members), patient, (v) => { patient = v; });
   }
 
   el.querySelector('#retake').onclick = onRetake;

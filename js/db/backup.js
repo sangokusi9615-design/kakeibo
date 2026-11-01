@@ -3,6 +3,7 @@
 import { STORES, SCHEMA_VERSION, getAll, clear, putMany, setMeta, getMeta } from './storage.js';
 import { todayISO, daysBetween } from '../utils/format.js';
 import { BACKUP_WARN_DAYS } from '../config/settings.js';
+import { ensureMembers } from '../features/members.js';
 
 const SECRET_META = ['apiKey'];
 
@@ -48,6 +49,7 @@ export async function importBackup(file) {
     await putMany(name, backup.data[name] || []);
   }
   if (apiKey) await setMeta('apiKey', apiKey);  // 端末の API キーは残す
+  await ensureMembers();                         // 古い版のバックアップには家族の一覧がないため作り直す
 }
 
 // 最終バックアップからの日数（一度もなければ null）

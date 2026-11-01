@@ -3,7 +3,7 @@
 
 import { EMERGENCY_MONTHS, KIDS_NISA } from '../config/settings.js';
 import { loadMasters, activeTransactions } from './transactions.js';
-import { getMeta } from '../db/storage.js';
+import { loadMembers } from './members.js';
 import { yen, esc, todayISO, monthKey, addMonths } from '../utils/format.js';
 import { applyWidths, isCurrent } from '../utils/ui.js';
 
@@ -33,16 +33,20 @@ export async function renderAssets(el) {
   const target = avg * EMERGENCY_MONTHS;
   const pct = target ? Math.min(100, Math.round((liquid / target) * 100)) : 0;
 
-  const childBirth = await getMeta('childBirth');
-  const withdrawFrom = childBirth
-    ? `${Number(childBirth.slice(0, 4)) + KIDS_NISA.withdrawAge}${childBirth.slice(4)}` : null;
+  // こどもNISA は口座の持ち主（子ども）の12歳の誕生日まで引き出せない
+  const members = await loadMembers({ includeInactive: true });
+  const withdrawNote = (a) => {
+    const birth = a.kind === 'kids_nisa' && members.find((mm) => mm.id === a.owner)?.birthDate;
+    if (!birth) return '';
+    return `<small>${Number(birth.slice(0, 4)) + KIDS_NISA.withdrawAge}年${Number(birth.slice(5, 7))}月まで引き出せません</small>`;
+  };
   if (!isCurrent('assets')) return;
 
   el.innerHTML = `
     <section class="view">
       <div class="metric big"><span>純資産</span><strong>${yen(net)}</strong></div>
       <ul class="cat-list">${m.accounts.map((a) => `
-        <li><div class="cat-row"><span>${esc(a.name)}${a.id === 'kids_nisa' && withdrawFrom ? `<small>${withdrawFrom.slice(0, 7).replace('-', '年')}月まで引き出せません</small>` : ''}</span>
+        <li><div class="cat-row"><span>${esc(a.name)}${withdrawNote(a)}</span>
         <span class="${bal[a.id] < 0 ? 'minus' : ''}">${yen(bal[a.id])}</span></div></li>`).join('')}
       </ul>
       <h3 class="section-title">生活防衛資金（生活費の${EMERGENCY_MONTHS}か月分）</h3>

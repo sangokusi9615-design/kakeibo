@@ -3,13 +3,13 @@
 import { MEDICAL, SELF_MEDICATION } from '../config/settings.js';
 import { activeTransactions } from './transactions.js';
 import { exportBackup, daysSinceBackup, backupOverdue } from '../db/backup.js';
-import { yen, todayISO } from '../utils/format.js';
+import { yen, esc, todayISO } from '../utils/format.js';
 import { toast, isCurrent } from '../utils/ui.js';
-
-const PATIENTS = { self: '自分', child: '子ども', family: 'ほかの家族' };
+import { loadMembers, memberName } from './members.js';
 
 export async function renderTodo(el) {
   const txs = await activeTransactions();
+  const members = await loadMembers({ includeInactive: true });
   const year = todayISO().slice(0, 4);
   const days = await daysSinceBackup();
   const overdue = await backupOverdue();
@@ -42,7 +42,7 @@ export async function renderTodo(el) {
       <h2>確定申告まとめ ${year}</h2>
       <div class="card">
         <div class="cat-row"><span>医療費（補てん後）</span><strong>${yen(medPaid)}</strong></div>
-        ${Object.entries(medByPatient).map(([p, v]) => `<div class="cat-row sub"><span>${PATIENTS[p] || p}</span><span>${yen(v)}</span></div>`).join('')}
+        ${Object.entries(medByPatient).map(([p, v]) => `<div class="cat-row sub"><span>${esc(memberName(members, p))}</span><span>${yen(v)}</span></div>`).join('')}
         <div class="cat-row"><span>セルフメディケーション対象</span><strong>${yen(selfmed)}</strong></div>
         <div class="cat-row"><span>控除額の目安</span><span>医療費控除 ${yen(medDeduction)} ／ セルフメディケーション ${smDeduction === null ? '（制度の値を確認中）' : yen(smDeduction)}</span></div>
         <p class="hint">${smDeduction !== null && (medDeduction || smDeduction)

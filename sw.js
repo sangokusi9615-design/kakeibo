@@ -1,13 +1,13 @@
 ﻿// Service Worker：オフライン起動用のキャッシュ。アプリの部品だけを持ち、API の通信はキャッシュしない
 // 部品を更新したら VERSION を上げる
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
   'js/app.js', 'js/db/storage.js', 'js/db/backup.js',
   'js/config/categories.js', 'js/config/settings.js', 'js/config/csv-formats.js',
   'js/features/transactions.js', 'js/features/receipt-scan.js', 'js/features/dashboard.js',
-  'js/features/review.js', 'js/features/todo.js', 'js/features/assets.js', 'js/features/settings.js',
+  'js/features/review.js', 'js/features/todo.js', 'js/features/assets.js', 'js/features/settings.js', 'js/features/members.js',
   'js/utils/format.js', 'js/utils/ui.js',
   'assets/icons/apple-touch-icon.png', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png',
 ];

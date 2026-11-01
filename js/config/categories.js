@@ -63,7 +63,7 @@ export const defaultAccounts = [
   { id: 'other_card', name: 'その他のカード', kind: 'card', liquid: false },
   { id: 'rakuten_bank', name: '楽天銀行', kind: 'bank', liquid: true },
   { id: 'nisa', name: '楽天証券 NISA', kind: 'nisa', liquid: false },
-  { id: 'kids_nisa', name: 'こどもNISA', kind: 'kids_nisa', liquid: false, owner: 'family' },
+  { id: 'kids_nisa', name: 'こどもNISA', kind: 'kids_nisa', liquid: false, owner: 'child' },  // 2人目以降は子どもごとに口座を足す（docs/09）
 ].map((a) => ({ owner: 'self', openingBalance: 0, openingDate: null, ...a }));
 
 // 入力画面で支払い方法として出す口座（並び順どおり）
