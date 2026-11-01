@@ -22,7 +22,10 @@ const TABS = [
 const main = document.getElementById('app');
 
 async function seed() {
-  if ((await getAll('categories')).length === 0) await putMany('categories', defaultCategories);
+  // 新しい版で増えた費目だけを足す（名前や表示を変えた費目はそのまま）
+  const have = new Set((await getAll('categories')).map((c) => c.id));
+  const missing = defaultCategories.filter((c) => !have.has(c.id));
+  if (missing.length) await putMany('categories', missing);
   if ((await getAll('accounts')).length === 0) await putMany('accounts', defaultAccounts);
   if (!(await getMeta('schemaVersion'))) await setMeta('schemaVersion', SCHEMA_VERSION);
   // 以前の版で入れた API キーなどは、使わなくなったので端末からも消す

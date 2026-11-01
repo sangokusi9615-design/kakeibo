@@ -1,9 +1,10 @@
 ﻿// 費目の初期値（docs/04_FP設計方針.md）。visible=false の費目は「その他」の一覧から選ぶ
-// group: income 収入 / saving 先取り / fixed 固定費 / variable 変動費 / medical 医療 / child 子ども / special 特別費
+// group: income 収入 / saving 先取り / fixed 固定費 / variable 変動費 / medical 医療 / child 子ども / special 特別費 / reimbursed 会社負担・立替
+// excluded=true の費目は、支出・収入の合計と貯蓄率に入れない（別枠で表示）
 
 export const GROUP_LABELS = {
   income: '収入', saving: '先取り貯蓄・投資', fixed: '固定費', variable: '変動費',
-  medical: '医療', child: '子ども', special: '特別費',
+  medical: '医療', child: '子ども', special: '特別費', reimbursed: '会社負担・立替',
 };
 
 export const defaultCategories = [
@@ -14,6 +15,8 @@ export const defaultCategories = [
   { id: 'tax_refund', name: '還付金', group: 'income', oneOff: true },
   { id: 'interest', name: '利息', group: 'income' },
   { id: 'income_other', name: 'その他の収入', group: 'income' },
+  { id: 'medical_refund', name: '医療費の払い戻し', group: 'income', oneOff: true },  // 子ども医療費助成など。医療費控除では補てん額として引く
+  { id: 'advance_back', name: '立替の戻り', group: 'income', excluded: true },        // 会社に立て替えた分が戻ったもの。収入に数えない
 
   { id: 'saving', name: '貯蓄', group: 'saving' },
   { id: 'nisa', name: 'NISA', group: 'saving' },
@@ -23,6 +26,7 @@ export const defaultCategories = [
   { id: 'insurance', name: '保険', group: 'fixed', icon: 'shield' },
   { id: 'subscription', name: 'サブスク', group: 'fixed', icon: 'repeat' },
   { id: 'utilities', name: '水道光熱', group: 'fixed', icon: 'bolt' },
+  { id: 'child_support', name: '養育費', group: 'fixed', icon: 'baby' },
 
   { id: 'food', name: '食費', group: 'variable', icon: 'cart', visible: true },
   { id: 'eatout', name: '外食', group: 'variable', icon: 'cup', visible: true },
@@ -45,6 +49,10 @@ export const defaultCategories = [
   { id: 'child_leisure', name: 'おもちゃ・レジャー', group: 'child', icon: 'baby' },
 
   { id: 'special', name: '特別費', group: 'special', icon: 'gift', visible: true },
+
+  // 会社負担・立替：いったん払うが会社から戻るもの。生活費の支出には数えない（excluded）
+  { id: 'commute', name: '通勤定期（会社負担）', group: 'reimbursed', icon: 'train', excluded: true },
+  { id: 'advance', name: '立替（あとで戻る）', group: 'reimbursed', icon: 'dots', excluded: true },
   { id: 'card_unknown', name: '他社カード（内訳なし）', group: 'variable', icon: 'dots' },
   { id: 'pay_unknown', name: '楽天ペイ（内訳なし）', group: 'variable', icon: 'dots' },
 ].map((c, i) => ({ visible: false, icon: 'dots', ...c, order: i }));

@@ -36,8 +36,11 @@ export async function renderSummary(el) {
   if (!isCurrent('summary')) return;
   const r = range(state.period, state.anchor);
   const txs = all.filter((t) => inRange(t, r));
-  const expenses = txs.filter((t) => t.type === 'expense');
-  const incomes = txs.filter((t) => t.type === 'income');
+  // 会社負担・立替（excluded の費目）は生活費・収入に数えず、別枠で出す
+  const excluded = (t) => m.cat[t.categoryId]?.excluded;
+  const expenses = txs.filter((t) => t.type === 'expense' && !excluded(t));
+  const incomes = txs.filter((t) => t.type === 'income' && !excluded(t));
+  const reimbursed = txs.filter((t) => t.type === 'expense' && excluded(t)).reduce((s, t) => s + t.amount, 0);
   const spend = expenses.reduce((s, t) => s + t.amount, 0);
   // 給付金・還付金は一時的な収入なので、貯蓄率の計算からは外して別枠で見せる（docs/04）
   const regularIncome = incomes.filter((t) => !m.cat[t.categoryId]?.oneOff).reduce((s, t) => s + t.amount, 0);
@@ -69,9 +72,10 @@ export async function renderSummary(el) {
         <div class="metric"><span>収支</span><strong class="${net >= 0 ? 'plus' : 'minus'}">${net >= 0 ? '+' : ''}${yen(net)}</strong></div>
         <div class="metric"><span>貯蓄率</span><strong>${rate === null ? '—' : `${rate}%`}</strong></div>
       </div>
-      ${oneOffIncome ? `<p class="hint">収入のうち給付金・還付金 ${yen(oneOffIncome)} は一時的なものなので、貯蓄率には入れていません</p>` : ''}
+      ${oneOffIncome ? `<p class="hint">収入のうち給付金・還付金・払い戻し ${yen(oneOffIncome)} は一時的なものなので、貯蓄率には入れていません</p>` : ''}
+      ${reimbursed ? `<p class="hint">会社負担・立替 ${yen(reimbursed)} は会社から戻るので、支出に含めていません</p>` : ''}
       ${state.period === 'week' ? weekReviewHtml(all, r, m) : ''}
-      ${state.period === 'year' ? yearBars(all, r.from.slice(0, 4)) : ''}
+      ${state.period === 'year' ? yearBars(all.filter((t) => !excluded(t)), r.from.slice(0, 4)) : ''}
       ${state.period === 'year' ? medicalHtml(all, r.from.slice(0, 4)) : ''}
       <h3 class="section-title">費目別</h3>
       <ul class="cat-list">${rows.length ? rows.map(([id, v]) => `
@@ -96,7 +100,8 @@ export async function renderSummary(el) {
 }
 
 function weekReviewHtml(all, r, m) {
-  const exp = (from, to) => all.filter((t) => t.type === 'expense' && t.date >= from && t.date <= to);
+  const exp = (from, to) => all.filter((t) => t.type === 'expense' && !m.cat[t.categoryId]?.excluded
+    && t.date >= from && t.date <= to);
   return weeklyReview(exp(r.from, r.to), exp(addDays(r.from, -7), addDays(r.from, -1)), m.cat);
 }
 

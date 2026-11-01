@@ -44,24 +44,24 @@ export const rakutenBank = {
 // 楽天銀行の入出金内容の判定（normalizeName 後）。上から順に判定する
 // 公開ファイルなので、勤務先・自治体名・口座番号など個人に結びつく語は書かない。それらは iPhone 内で学習する
 export const bankRules = [
-  { test: /^ラクテンカ-ドサ-ビス/, kind: 'transfer', to: '楽天カード' },      // カード代金の引き落とし
-  { test: /^カ-ド出金|ATM/, kind: 'transfer', to: '財布' },                  // 現金の引き出し
+  { test: /^ラクテンカ-ドサ-ビス/, kind: 'transfer', to: 'rakuten_card' },    // カード代金の引き落とし
+  { test: /^カ-ド出金|ATM/, kind: 'transfer', to: 'cash' },                  // 現金の引き出し
   // 楽天以外のカード会社の引き落とし（「〇〇カ-ド」で終わる）。会社名は書かない。明細は取り込まず、
   // 支払いは「他社カード」口座への振替にして、記録のない分を「他社カード（内訳なし）」の支出で補う（docs/03）
-  { test: /カ-ド$/, kind: 'transfer', to: '他社カード' },
-  { test: /^給与/, kind: 'income', category: '給与' },
-  { test: /^賞与/, kind: 'income', category: '賞与' },
-  { test: /ジドウテアテ|児童手当/, kind: 'income', category: '児童手当' },
-  { test: /コドモイリヨウヒ|子ども医療費/, kind: 'refund', category: '医療' },  // 子ども医療費助成の払い戻し → 医療費の補てん
-  { test: /ゼイムシヨ|税務署/, kind: 'income', category: '還付金' },
-  { test: /シヨクギヨウアンテイ|職業安定/, kind: 'income', category: '給付金' }, // 育児休業給付金など（非課税）
-  { test: /利息|現金プレゼント/, kind: 'income', category: '利息' },
+  { test: /カ-ド$/, kind: 'transfer', to: 'other_card' },
+  { test: /^給与/, kind: 'income', category: 'salary' },
+  { test: /^賞与/, kind: 'income', category: 'bonus' },
+  { test: /ジドウテアテ|児童手当/, kind: 'income', category: 'child_allowance' },
+  { test: /コドモイリヨウヒ|子ども医療費/, kind: 'income', category: 'medical_refund' },  // 子ども医療費助成の払い戻し → 医療費の補てん
+  { test: /ゼイムシヨ|税務署/, kind: 'income', category: 'tax_refund' },
+  { test: /シヨクギヨウアンテイ|職業安定/, kind: 'income', category: 'benefit' },       // 育児休業給付金など（非課税）
+  { test: /利息|現金プレゼント/, kind: 'income', category: 'interest' },
 ];
 
-// 上から順に判定し、最初に当たったものを使う（照合は normalizeName 後の店名）
+// 上から順に判定し、最初に当たったものを使う（照合は normalizeName 後の店名）。to は口座の id
 export const transferRules = [
-  { test: /^楽天ペイ残高/, to: '楽天ペイ残高' },   // 「オートチャージ」「チャージ」の両方
-  { test: /楽天証券/, to: '楽天証券NISA' },        // クレカ積立
+  { test: /^楽天ペイ残高/, to: 'rakuten_pay' },   // 「オートチャージ」「チャージ」の両方
+  { test: /楽天証券/, to: 'nisa' },               // クレカ積立
 ];
 
 // 初期の店名ルール。公開するファイルなので全国チェーンなど一般的な名前だけにする（docs/07_個人情報の扱い.md）

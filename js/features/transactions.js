@@ -232,7 +232,7 @@ export async function renderInput(el, { onScan }) {
   const showMore = () => {
     const box = el.querySelector('#more');
     const groups = kind === 'expense'
-      ? ['fixed', 'variable', 'medical', 'child', 'special']
+      ? ['fixed', 'variable', 'medical', 'child', 'special', 'reimbursed']
       : ['income'];
     box.innerHTML = groups.map((g) => `
       <p class="group-label">${GROUP_LABELS[g]}</p>

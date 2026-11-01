@@ -155,6 +155,13 @@ small { display: block; color: var(--muted); font-size: 12px; }
 .member-row .inline { grid-column: 1 / -1; }
 .member-row.inactive input:not([type="checkbox"]) { opacity: 0.5; }
 .member-add { display: flex; flex-direction: column; gap: 10px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.task-btn { border: none; background: transparent; padding: 0; color: var(--accent); text-align: left; }
+.import-list { list-style: none; margin: 0; padding: 0; }
+.import-item { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+.import-line { display: grid; grid-template-columns: 44px 1fr auto; gap: 8px; align-items: center; }
+.import-item .label { display: flex; flex-direction: column; gap: 4px; margin: 0; }
+details { margin-top: 16px; }
+summary { color: var(--accent); cursor: pointer; padding: 8px 0; }
 .steps { margin: 0 0 16px; padding-left: 22px; font-size: 14px; }
 .steps li { margin-bottom: 4px; }
 textarea {
